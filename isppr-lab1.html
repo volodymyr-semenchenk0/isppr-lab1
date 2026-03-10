@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторна робота №1 — Коректний семантичний аналіз</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; padding: 20px; line-height: 1.5; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 900px; margin: auto; }
+        #wordtree_basic { width: 100%; height: 400px; border: 1px solid #eee; margin: 20px 0; }
+        .text-box { background: #fff9c4; padding: 15px; border-left: 5px solid #fbc02d; margin-bottom: 20px; font-style: italic; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+        .btn-csharp { background-color: #68217a; }
+        .btn-samsung { background-color: #034ea2; }
+        button:hover { opacity: 0.8; transform: translateY(-1px); }
+        #analysisResults { padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6; min-height: 60px; }
+        .highlight { background-color: #ffeb3b; font-weight: bold; padding: 0 2px; }
+    </style>
+
+    <script type="text/javascript">
+        google.charts.load('current', {packages:['wordtree']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Phrases'],
+                ['Сайт технології Frontend HTML5'],
+                ['Сайт технології Frontend CSS3'],
+                ['Сайт технології Frontend JavaScript'],
+                ['Сайт технології Backend PHP Laravel'],
+                ['Сайт технології Backend Python Django'],
+                ['Сайт технології Backend Node.js'],
+                ['Сайт технології Database SQL PostgreSQL'],
+                ['Сайт технології Database NoSQL MongoDB'],
+                ['Сайт технології Deployment Docker'],
+                ['Сайт технології Deployment Nginx']
+            ]);
+            var options = { wordtree: { format: 'implicit', word: 'Сайт' } };
+            var chart = new google.visualization.WordTree(document.getElementById('wordtree_basic'));
+            chart.draw(data, options);
+        }
+
+        function analyzeKeyword(keyword) {
+            const textElement = document.getElementById('sourceText');
+            const originalText = textElement.innerText;
+            const resultsContainer = document.getElementById('analysisResults');
+            
+            // Очищення тексту від зайвих пробілів та розбиття на речення
+            // Використовуємо ретельніший поділ, щоб крапки в абревіатурах не заважали
+            const sentences = originalText.match(/[^.!?]+[.!?]+/g) || [originalText];
+            
+            let regex;
+            if (keyword === 'C#') {
+                regex = new RegExp('C#(?![a-zA-Z0-9])', 'gi');
+            } else {
+                regex = new RegExp('\\b' + keyword + '\\b', 'gi');
+            }
+
+            const matches = originalText.match(regex);
+            const count = matches ? matches.length : 0;
+
+            const foundInSentences = sentences.filter(s => regex.test(s));
+
+            let html = `<strong>Результат аналізу для «${keyword}»:</strong><br>`;
+            html += `Знайдено точних входжень: <span style="font-size: 1.2em; color: red;">${count}</span><br><br>`;
+            
+            if (count > 0) {
+                html += `<strong>Знайдено в реченнях:</strong><ul>`;
+                foundInSentences.forEach(s => {
+                    const highlighted = s.trim().replace(regex, (match) => `<span class="highlight">${match}</span>`);
+                    html += `<li>${highlighted}</li>`;
+                });
+                html += `</ul>`;
+            } else {
+                html += `<p>Слово не знайдено у наведеному тексті.</p>`;
+            }
+
+            resultsContainer.innerHTML = html;
+        }
+    </script>
+</head>
+<body>
+
+<div class="card">
+    <h1>Лабораторна робота №1</h1>
+    
+    <h2>1. Семантична мережа</h2>
+    <div id="wordtree_basic"></div>
+
+    <h2>2. Семантичний аналіз тексту</h2>
+    <div class="text-box" id="sourceText">
+        Samsung electronics is a global leader. Many developers prefer C# for enterprise solutions. 
+        Samsung Galaxy devices are popular. If you learn C#, you can build great apps. 
+        The collaboration between Samsung and other tech giants is vital. 
+        Modern C# features simplify coding. I have a Samsung monitor.
+    </div>
+
+    <div class="controls">
+        <button class="btn-csharp" onclick="analyzeKeyword('C#')">Шукати "C#"</button>
+        <button class="btn-samsung" onclick="analyzeKeyword('Samsung')">Шукати "Samsung"</button>
+    </div>
+
+    <div id="analysisResults">
+        <em>Оберіть слово для аналізу, натиснувши відповідну кнопку.</em>
+    </div>
+</div>
+
+</body>
+</html>
